@@ -22,10 +22,30 @@ public class IndexedMinHeap<K> {
     }
 
     public boolean contains(K key) {
-        return positionByKey.containsKey(key);
+        return key != null && positionByKey.containsKey(key);
+    }
+
+    public Entry<K> peekMin() {
+        if (heap.isEmpty()) {
+            throw new NoSuchElementException("Heap is empty");
+        }
+        return heap.get(0);
+    }
+
+    public double priorityOf(K key) {
+        Objects.requireNonNull(key, "Heap key must not be null");
+        Integer index = positionByKey.get(key);
+        if (index == null) {
+            throw new NoSuchElementException("Key not present in heap: " + key);
+        }
+        return heap.get(index).priority();
     }
 
     public void insertOrDecreaseKey(K key, double priority) {
+        Objects.requireNonNull(key, "Heap key must not be null");
+        if (Double.isNaN(priority)) {
+            throw new IllegalArgumentException("Priority must not be NaN");
+        }
         Integer existingIndex = positionByKey.get(key);
         if (existingIndex != null) {
             if (priority < heap.get(existingIndex).priority()) {

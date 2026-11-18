@@ -28,6 +28,9 @@ public final class GraphAlgorithms {
         if (adjacency == null || start == null) {
             throw new IllegalArgumentException("Adjacency map and start vertex must not be null");
         }
+        if (!adjacency.containsKey(start)) {
+            throw new IllegalArgumentException("Start vertex is missing from adjacency map: " + start);
+        }
         List<V> order = new ArrayList<>();
         Set<V> visited = new LinkedHashSet<>();
         Deque<V> queue = new ArrayDeque<>();
@@ -38,8 +41,12 @@ public final class GraphAlgorithms {
         while (!queue.isEmpty()) {
             V current = queue.removeFirst();
             order.add(current);
-            for (V neighbor : adjacency.getOrDefault(current, List.of())) {
-                if (visited.add(neighbor)) {
+            List<V> neighbors = adjacency.getOrDefault(current, List.of());
+            if (neighbors == null) {
+                continue;
+            }
+            for (V neighbor : neighbors) {
+                if (neighbor != null && visited.add(neighbor)) {
                     queue.addLast(neighbor);
                 }
             }
@@ -54,6 +61,9 @@ public final class GraphAlgorithms {
         if (adjacency == null || start == null) {
             throw new IllegalArgumentException("Adjacency map and start vertex must not be null");
         }
+        if (!adjacency.containsKey(start)) {
+            throw new IllegalArgumentException("Start vertex is missing from adjacency map: " + start);
+        }
         List<V> order = new ArrayList<>();
         Set<V> visited = new HashSet<>();
         Deque<V> stack = new ArrayDeque<>();
@@ -66,9 +76,12 @@ public final class GraphAlgorithms {
             }
             order.add(current);
             List<V> neighbors = adjacency.getOrDefault(current, List.of());
+            if (neighbors == null) {
+                continue;
+            }
             for (int i = neighbors.size() - 1; i >= 0; i--) {
                 V neighbor = neighbors.get(i);
-                if (!visited.contains(neighbor)) {
+                if (neighbor != null && !visited.contains(neighbor)) {
                     stack.push(neighbor);
                 }
             }

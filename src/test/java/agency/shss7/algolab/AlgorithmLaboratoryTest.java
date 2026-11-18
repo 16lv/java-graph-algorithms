@@ -144,7 +144,7 @@ class AlgorithmLaboratoryTest {
     @Test
     void levenshteinAndKnapsackProduceExactOptimalValues() {
         assertEquals(3, DynamicProgramming.levenshteinDistance("kitten", "sitting"));
-        assertEquals(0, DynamicProgramming.levenshteinDistance("cardiff", "cardiff"));
+        assertEquals(0, DynamicProgramming.levenshteinDistance("algolab", "algolab"));
 
         int[] weights = {2, 3, 4, 5};
         int[] values = {3, 4, 5, 8};
@@ -153,7 +153,7 @@ class AlgorithmLaboratoryTest {
     }
 
     @Test
-    void lruCacheRemovalAndGraphBoundaryValidationBehaveCorrectly() {
+    void lruCacheRemovalHeapGuardsAndGraphValidationBehaveCorrectly() {
         LruCache<String, Integer> cache = new LruCache<>(2);
         cache.put("x", 10);
         assertTrue(cache.containsKey("x"));
@@ -161,12 +161,21 @@ class AlgorithmLaboratoryTest {
         assertFalse(cache.containsKey("x"));
         assertEquals(0, cache.size());
 
+        IndexedMinHeap<String> heap = new IndexedMinHeap<>();
+        assertThrows(NullPointerException.class, () -> heap.insertOrDecreaseKey(null, 1.0));
+        assertThrows(IllegalArgumentException.class, () -> heap.insertOrDecreaseKey("a", Double.NaN));
+        heap.insertOrDecreaseKey("a", 5.0);
+        assertEquals("a", heap.peekMin().key());
+        assertEquals(5.0, heap.priorityOf("a"), 1e-9);
+
         Map<String, List<Edge<String>>> disconnected = Map.of("S", List.of(), "T", List.of());
         var unreachable = GraphAlgorithms.dijkstra(disconnected, "S", "T");
         assertEquals(Double.POSITIVE_INFINITY, unreachable.totalDistance());
         assertTrue(unreachable.path().isEmpty());
 
         assertThrows(IllegalArgumentException.class, () -> GraphAlgorithms.dijkstra(disconnected, "MISSING", "T"));
+        assertThrows(IllegalArgumentException.class, () -> GraphAlgorithms.breadthFirstSearch(Map.of("A", List.of()), "Z"));
+        assertThrows(IllegalArgumentException.class, () -> GraphAlgorithms.depthFirstSearch(Map.of("A", List.of()), "Z"));
         assertThrows(
             IllegalArgumentException.class,
             () -> GraphAlgorithms.kruskalMinimumSpanningTree(3, List.of(new Edge<>(0, 5, 1.0)))
