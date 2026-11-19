@@ -176,6 +176,8 @@ class AlgorithmLaboratoryTest {
         assertThrows(IllegalArgumentException.class, () -> GraphAlgorithms.dijkstra(disconnected, "MISSING", "T"));
         assertThrows(IllegalArgumentException.class, () -> GraphAlgorithms.breadthFirstSearch(Map.of("A", List.of()), "Z"));
         assertThrows(IllegalArgumentException.class, () -> GraphAlgorithms.depthFirstSearch(Map.of("A", List.of()), "Z"));
+        assertThrows(IllegalArgumentException.class, () -> new Edge<>("A", "B", Double.NaN));
+        assertThrows(IllegalArgumentException.class, () -> new Edge<>("A", "B", Double.POSITIVE_INFINITY));
         assertThrows(
             IllegalArgumentException.class,
             () -> GraphAlgorithms.kruskalMinimumSpanningTree(3, List.of(new Edge<>(0, 5, 1.0)))

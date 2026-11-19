@@ -18,7 +18,6 @@ public final class BenchmarkRunner {
         System.out.println("====================================================================");
 
         Random rng = new Random(42L);
-        // Warmup JIT
         for (int i = 0; i < 5; i++) {
             int[] warm = rng.ints(10_000, 0, 1_000_000).toArray();
             SortingAndSelection.mergeSort(warm);

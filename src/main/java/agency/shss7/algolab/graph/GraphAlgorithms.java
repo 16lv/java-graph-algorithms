@@ -10,8 +10,8 @@ public final class GraphAlgorithms {
 
     public record Edge<V>(V from, V to, double weight) {
         public Edge {
-            if (weight < 0) {
-                throw new IllegalArgumentException("Edge weight must be non-negative: " + weight);
+            if (!(weight >= 0.0) || Double.isInfinite(weight)) {
+                throw new IllegalArgumentException("Edge weight must be finite and non-negative: " + weight);
             }
         }
     }
@@ -117,7 +117,14 @@ public final class GraphAlgorithms {
                 return new PathResult<>(reconstructPath(prev, source, target), current.priority(), visited);
             }
 
-            for (Edge<V> edge : adjacency.getOrDefault(u, List.of())) {
+            List<Edge<V>> outgoing = adjacency.getOrDefault(u, List.of());
+            if (outgoing == null) {
+                continue;
+            }
+            for (Edge<V> edge : outgoing) {
+                if (edge == null || edge.to() == null) {
+                    continue;
+                }
                 double candidate = dist.get(u) + edge.weight();
                 if (candidate < dist.getOrDefault(edge.to(), Double.POSITIVE_INFINITY)) {
                     dist.put(edge.to(), candidate);
@@ -136,9 +143,18 @@ public final class GraphAlgorithms {
         }
         Map<V, Integer> inDegree = new LinkedHashMap<>();
         for (var entry : dag.entrySet()) {
+            if (entry.getKey() == null) {
+                continue;
+            }
             inDegree.putIfAbsent(entry.getKey(), 0);
-            for (V neighbor : entry.getValue()) {
-                inDegree.put(neighbor, inDegree.getOrDefault(neighbor, 0) + 1);
+            List<V> neighbors = entry.getValue();
+            if (neighbors == null) {
+                continue;
+            }
+            for (V neighbor : neighbors) {
+                if (neighbor != null) {
+                    inDegree.put(neighbor, inDegree.getOrDefault(neighbor, 0) + 1);
+                }
             }
         }
 
@@ -153,7 +169,14 @@ public final class GraphAlgorithms {
         while (!queue.isEmpty()) {
             V vertex = queue.removeFirst();
             ordering.add(vertex);
-            for (V neighbor : dag.getOrDefault(vertex, List.of())) {
+            List<V> neighbors = dag.getOrDefault(vertex, List.of());
+            if (neighbors == null) {
+                continue;
+            }
+            for (V neighbor : neighbors) {
+                if (neighbor == null) {
+                    continue;
+                }
                 int updated = inDegree.compute(neighbor, (k, v) -> v - 1);
                 if (updated == 0) {
                     queue.addLast(neighbor);

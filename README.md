@@ -1,15 +1,41 @@
 # java-graph-algorithms
 
-Java 21 library of graph search, shortest-path routing, minimum spanning tree, sorting, dynamic programming, and generic data structures with JUnit 5 verification and an empirical CLI benchmark runner.
+Clean, test-verified **Java 21** implementations of graph traversal, shortest-path routing, sorting, order statistics, dynamic programming, and core data structures without third-party algorithm libraries.
+
+## Overview
+
+Built as an algorithmic reference library and benchmark harness using standard Java collections and primitive arrays so every pointer mutation, heap swap, and complexity bound stays explicit and inspectable.
 
 ## Implemented Components
 
-- **Graph algorithms (`GraphAlgorithms`)**: Iterative BFS and DFS with start-vertex validation, Dijkstra's shortest path backed by `IndexedMinHeap`, Kahn's topological sort with cycle detection, and Kruskal's MST using `DisjointSetUnion`.
-- **Structures (`IndexedMinHeap`, `DisjointSetUnion`, `LruCache`)**: `IndexedMinHeap` with `O(log V)` in-place priority decrease, `peekMin()`, `priorityOf()`, and null/NaN guards; sentinel-bounded `LruCache` with `O(1)` lookup, promotion, eviction, and `remove()`.
-- **Sorting & selection (`SortingAndSelection`)**: Iterative bottom-up MergeSort, QuickSort, binary search, `lowerBound`, and Hoare QuickSelect.
-- **Dynamic programming (`DynamicProgramming`)**: Space-optimised Levenshtein edit distance and rolling 1D 0/1 knapsack solver.
+| Component | Highlights | Complexity |
+| :--- | :--- | :--- |
+| `IndexedMinHeap<K>` | Binary min-heap + index map for decrease-key, `peekMin()`, `priorityOf()`, NaN/null guards | `O(log V)` update / poll |
+| `GraphAlgorithms` | BFS, DFS, Dijkstra shortest path, Kahn topological sort + cycle check, Kruskal MST | `O((V + E) log V)` / `O(E log E)` |
+| `DisjointSetUnion` | Union-Find with path compression & union-by-rank | `O(alpha(N))` amortised |
+| `LruCache<K, V>` | `O(1)` lookup/eviction with sentinel doubly-linked list + `HashMap` | `O(1)` get / put / remove |
+| `SortingAndSelection` | Iterative Bottom-Up MergeSort, QuickSort, Binary Search, `lowerBound`, QuickSelect | `O(N log N)` / `O(N)` expected |
+| `DynamicProgramming` | Rolling-array Levenshtein edit distance & 0/1 Knapsack | `O(min(N,M))` / `O(W)` space |
 
-## Structure
+## Technology Stack
+
+- Java 21 LTS
+- Maven 3.9+
+- JUnit 5 (Jupiter)
+
+## Build, Run & Benchmarks
+
+```bash
+mvn -B test
+mvn -B -q compile exec:java -Dexec.mainClass="agency.shss7.algolab.benchmark.BenchmarkRunner"
+```
+
+## Technical Implementation Details
+
+- `GraphAlgorithms.Edge` rejects negative, `NaN`, and infinite weights up front (`!(weight >= 0.0) || Double.isInfinite(weight)`) so priority queues never compare invalid IEEE-754 weights.
+- `SortingAndSelection.mergeSort` runs iteratively bottom-up to keep recursion stack depth at `O(1)`, and `DynamicProgramming` reuses rolling 1D arrays rather than allocating full 2D DP matrices.
+
+## Project Structure
 
 ```text
 java-graph-algorithms/
@@ -22,13 +48,18 @@ java-graph-algorithms/
 │       ├── DisjointSetUnion.java
 │       ├── IndexedMinHeap.java
 │       └── LruCache.java
-└── src/test/java/agency/shss7/algolab/AlgorithmLaboratoryTest.java
+├── src/test/java/agency/shss7/algolab/
+│   └── AlgorithmLaboratoryTest.java
+└── pom.xml
 ```
 
-## Build & Run
+## Testing
 
 ```bash
-mvn test
-mvn -q package
-java -jar target/java-algorithms-lab-1.2.0.jar
+mvn -B test
 ```
+
+## Known Limitations & Future Improvements
+
+- `LruCache` is intentionally single-threaded without internal locking; concurrent workloads require external synchronisation.
+- Dijkstra assumes non-negative edge weights (`Edge` rejects `< 0` and `NaN`); adding Bellman-Ford for negative weights and negative-cycle detection is planned next.
