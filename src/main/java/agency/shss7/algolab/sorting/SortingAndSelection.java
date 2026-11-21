@@ -35,12 +35,16 @@ public final class SortingAndSelection {
     }
 
     private static void quickSortRange(int[] a, int lo, int hi) {
-        if (lo >= hi) {
-            return;
+        while (lo < hi) {
+            int pivotIdx = partition(a, lo, hi);
+            if (pivotIdx - lo < hi - pivotIdx) {
+                quickSortRange(a, lo, pivotIdx - 1);
+                lo = pivotIdx + 1;
+            } else {
+                quickSortRange(a, pivotIdx + 1, hi);
+                hi = pivotIdx - 1;
+            }
         }
-        int pivotIdx = partition(a, lo, hi);
-        quickSortRange(a, lo, pivotIdx - 1);
-        quickSortRange(a, pivotIdx + 1, hi);
     }
 
     /**
