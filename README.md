@@ -11,7 +11,7 @@ Built as an algorithmic reference library and benchmark harness using standard J
 | Component | Highlights | Complexity |
 | :--- | :--- | :--- |
 | `IndexedMinHeap<K>` | Binary min-heap + index map for decrease-key, `peekMin()`, `priorityOf()`, NaN/null guards | `O(log V)` update / poll |
-| `GraphAlgorithms` | BFS, DFS, Dijkstra shortest path, Kahn topological sort + cycle check, Kruskal MST | `O((V + E) log V)` / `O(E log E)` |
+| `GraphAlgorithms` | BFS, DFS, Dijkstra shortest path, Bellman-Ford (negative weights + cycle detection), Kahn topological sort + cycle check, Kruskal MST | `O((V + E) log V)` / `O(VE)` |
 | `DisjointSetUnion` | Union-Find with path compression & union-by-rank | `O(alpha(N))` amortised |
 | `LruCache<K, V>` | `O(1)` lookup/eviction with sentinel doubly-linked list + `HashMap` | `O(1)` get / put / remove |
 | `SortingAndSelection` | Iterative Bottom-Up MergeSort, QuickSort, Binary Search, `lowerBound`, QuickSelect | `O(N log N)` / `O(N)` expected |
@@ -62,4 +62,4 @@ mvn -B test
 ## Known Limitations & Future Improvements
 
 - `LruCache` is intentionally single-threaded without internal locking; concurrent workloads require external synchronisation.
-- Dijkstra assumes non-negative edge weights (`Edge` rejects `< 0` and `NaN`); adding Bellman-Ford for negative weights and negative-cycle detection is planned next.
+- Dijkstra assumes non-negative edge weights (`Edge` rejects `< 0` and `NaN`); use `GraphAlgorithms.bellmanFord()` with `SignedEdge` when negative weights or negative-cycle detection are required.

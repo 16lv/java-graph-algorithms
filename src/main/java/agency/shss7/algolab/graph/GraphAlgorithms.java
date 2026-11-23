@@ -225,6 +225,75 @@ public final class GraphAlgorithms {
         return mst;
     }
 
+    /**
+     * Directed weighted edge permitting negative weights while rejecting NaN and infinity.
+     */
+    public record SignedEdge<V>(V from, V to, double weight) {
+        public SignedEdge {
+            Objects.requireNonNull(from, "Edge source must not be null");
+            Objects.requireNonNull(to, "Edge target must not be null");
+            if (Double.isNaN(weight) || Double.isInfinite(weight)) {
+                throw new IllegalArgumentException("Edge weight must be finite: " + weight);
+            }
+        }
+    }
+
+    /**
+     * Computes single-source shortest path distances allowing negative edge weights,
+     * throwing {@link IllegalStateException} when a reachable negative cycle exists.
+     */
+    public static <V> Map<V, Double> bellmanFord(
+        Collection<V> vertices,
+        List<SignedEdge<V>> edges,
+        V source
+    ) {
+        if (vertices == null || edges == null || source == null) {
+            throw new IllegalArgumentException("Vertices, edges, and source must not be null");
+        }
+
+        Map<V, Double> distances = new LinkedHashMap<>();
+        for (V vertex : vertices) {
+            if (vertex == null) {
+                throw new IllegalArgumentException("Vertices must not contain null");
+            }
+            distances.put(vertex, Double.POSITIVE_INFINITY);
+        }
+        if (!distances.containsKey(source)) {
+            throw new IllegalArgumentException("Source vertex is not in vertex collection: " + source);
+        }
+        distances.put(source, 0.0);
+
+        for (SignedEdge<V> edge : edges) {
+            if (edge == null || !distances.containsKey(edge.from()) || !distances.containsKey(edge.to())) {
+                throw new IllegalArgumentException("Every edge must reference vertices present in vertex collection");
+            }
+        }
+
+        int passCount = Math.max(0, distances.size() - 1);
+        for (int i = 0; i < passCount; i++) {
+            boolean updated = false;
+            for (SignedEdge<V> edge : edges) {
+                double distFrom = distances.get(edge.from());
+                if (Double.isFinite(distFrom) && distFrom + edge.weight() < distances.get(edge.to())) {
+                    distances.put(edge.to(), distFrom + edge.weight());
+                    updated = true;
+                }
+            }
+            if (!updated) {
+                break;
+            }
+        }
+
+        for (SignedEdge<V> edge : edges) {
+            double distFrom = distances.get(edge.from());
+            if (Double.isFinite(distFrom) && distFrom + edge.weight() < distances.get(edge.to())) {
+                throw new IllegalStateException("Reachable negative-weight cycle detected from source: " + source);
+            }
+        }
+
+        return Collections.unmodifiableMap(distances);
+    }
+
     private static <V> List<V> reconstructPath(Map<V, V> prev, V source, V target) {
         LinkedList<V> path = new LinkedList<>();
         V curr = target;

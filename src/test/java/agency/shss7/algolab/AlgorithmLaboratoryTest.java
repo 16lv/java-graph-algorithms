@@ -3,6 +3,7 @@ package agency.shss7.algolab;
 import agency.shss7.algolab.dp.DynamicProgramming;
 import agency.shss7.algolab.graph.GraphAlgorithms;
 import agency.shss7.algolab.graph.GraphAlgorithms.Edge;
+import agency.shss7.algolab.graph.GraphAlgorithms.SignedEdge;
 import agency.shss7.algolab.sorting.SortingAndSelection;
 import agency.shss7.algolab.structures.DisjointSetUnion;
 import agency.shss7.algolab.structures.IndexedMinHeap;
@@ -181,6 +182,40 @@ class AlgorithmLaboratoryTest {
         assertThrows(
             IllegalArgumentException.class,
             () -> GraphAlgorithms.kruskalMinimumSpanningTree(3, List.of(new Edge<>(0, 5, 1.0)))
+        );
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> new SignedEdge<>("S", "A", Double.NaN)
+        );
+    }
+
+    @Test
+    void bellmanFordHandlesNegativeWeightsAndDetectsReachableNegativeCycles() {
+        List<String> vertices = List.of("S", "A", "B", "C", "U");
+        List<SignedEdge<String>> edges = List.of(
+            new SignedEdge<>("S", "A", 4.0),
+            new SignedEdge<>("S", "B", 5.0),
+            new SignedEdge<>("A", "C", 6.0),
+            new SignedEdge<>("B", "A", -2.0),
+            new SignedEdge<>("A", "B", 3.0)
+        );
+
+        Map<String, Double> dist = GraphAlgorithms.bellmanFord(vertices, edges, "S");
+        assertEquals(0.0, dist.get("S"));
+        assertEquals(3.0, dist.get("A")); // S -> B (5) -> A (-2) = 3
+        assertEquals(5.0, dist.get("B"));
+        assertEquals(9.0, dist.get("C"));
+        assertEquals(Double.POSITIVE_INFINITY, dist.get("U"));
+
+        // Reachable negative cycle S -> A -> B -> A (-1 net cycle) throws IllegalStateException
+        List<SignedEdge<String>> cycleEdges = List.of(
+            new SignedEdge<>("S", "A", 1.0),
+            new SignedEdge<>("A", "B", 2.0),
+            new SignedEdge<>("B", "A", -3.5)
+        );
+        assertThrows(
+            IllegalStateException.class,
+            () -> GraphAlgorithms.bellmanFord(List.of("S", "A", "B"), cycleEdges, "S")
         );
     }
 }
