@@ -1,6 +1,9 @@
 package agency.shss7.algolab.structures;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -90,6 +93,20 @@ public class LruCache<K, V> {
 
     public int capacity() {
         return capacity;
+    }
+
+    /**
+     * Returns an unmodifiable snapshot of keys from most-recently-used to least-recently-used
+     * without altering recency order.
+     */
+    public List<K> keysMostRecentFirst() {
+        List<K> keys = new ArrayList<>(index.size());
+        Node<K, V> curr = head.next;
+        while (curr != tail) {
+            keys.add(curr.key);
+            curr = curr.next;
+        }
+        return Collections.unmodifiableList(keys);
     }
 
     private void moveToFront(Node<K, V> node) {

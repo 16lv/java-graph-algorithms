@@ -77,6 +77,28 @@ public class IndexedMinHeap<K> {
         return min;
     }
 
+    /**
+     * Removes a key from the heap in O(log V) time while preserving index bijection.
+     */
+    public boolean remove(K key) {
+        if (key == null) {
+            return false;
+        }
+        Integer idx = positionByKey.remove(key);
+        if (idx == null) {
+            return false;
+        }
+        int lastIdx = heap.size() - 1;
+        Entry<K> last = heap.remove(lastIdx);
+        if (idx < lastIdx) {
+            heap.set(idx, last);
+            positionByKey.put(last.key(), idx);
+            siftUp(idx);
+            siftDown(idx);
+        }
+        return true;
+    }
+
     private void siftUp(int idx) {
         while (idx > 0) {
             int parent = (idx - 1) >>> 1;

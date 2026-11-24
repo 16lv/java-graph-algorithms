@@ -10,10 +10,10 @@ Built as an algorithmic reference library and benchmark harness using standard J
 
 | Component | Highlights | Complexity |
 | :--- | :--- | :--- |
-| `IndexedMinHeap<K>` | Binary min-heap + index map for decrease-key, `peekMin()`, `priorityOf()`, NaN/null guards | `O(log V)` update / poll |
+| `IndexedMinHeap<K>` | Binary min-heap + index map for decrease-key, `remove()`, `peekMin()`, `priorityOf()`, NaN/null guards | `O(log V)` update / remove / poll |
 | `GraphAlgorithms` | BFS, DFS, Dijkstra shortest path, Bellman-Ford (negative weights + cycle detection), Kahn topological sort + cycle check, Kruskal MST | `O((V + E) log V)` / `O(VE)` |
 | `DisjointSetUnion` | Union-Find with path compression & union-by-rank | `O(alpha(N))` amortised |
-| `LruCache<K, V>` | `O(1)` lookup/eviction with sentinel doubly-linked list + `HashMap` | `O(1)` get / put / remove |
+| `LruCache<K, V>` | `O(1)` lookup/eviction with sentinel doubly-linked list + `HashMap` + `keysMostRecentFirst()` snapshot | `O(1)` get / put / remove |
 | `SortingAndSelection` | Iterative Bottom-Up MergeSort, QuickSort, Binary Search, `lowerBound`, QuickSelect | `O(N log N)` / `O(N)` expected |
 | `DynamicProgramming` | Rolling-array Levenshtein edit distance & 0/1 Knapsack | `O(min(N,M))` / `O(W)` space |
 

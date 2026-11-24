@@ -218,4 +218,32 @@ class AlgorithmLaboratoryTest {
             () -> GraphAlgorithms.bellmanFord(List.of("S", "A", "B"), cycleEdges, "S")
         );
     }
+
+    @Test
+    void indexedMinHeapRemoveAndLruOrderSnapshotPreserveInvariants() {
+        IndexedMinHeap<String> heap = new IndexedMinHeap<>();
+        heap.insertOrDecreaseKey("P1", 10.0);
+        heap.insertOrDecreaseKey("P2", 3.0);
+        heap.insertOrDecreaseKey("P3", 7.0);
+        heap.insertOrDecreaseKey("P4", 1.5);
+        heap.insertOrDecreaseKey("P5", 5.0);
+
+        assertTrue(heap.remove("P2"));
+        assertFalse(heap.remove("P2"));
+        assertFalse(heap.contains("P2"));
+        assertEquals(4, heap.size());
+
+        List<String> order = new ArrayList<>();
+        while (!heap.isEmpty()) {
+            order.add(heap.pollMin().key());
+        }
+        assertEquals(List.of("P4", "P5", "P3", "P1"), order);
+
+        LruCache<String, Integer> cache = new LruCache<>(3);
+        cache.put("X", 1);
+        cache.put("Y", 2);
+        cache.put("Z", 3);
+        cache.get("X");
+        assertEquals(List.of("X", "Z", "Y"), cache.keysMostRecentFirst());
+    }
 }
